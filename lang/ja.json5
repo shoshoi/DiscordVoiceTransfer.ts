@@ -9,9 +9,9 @@
         room_DeadVoice   : "聞き耳部屋"
     },
     sys : {
-        cmd_make_room     : ["make_room"],
-        cmd_link_voice    : ["link_Voice"],
-        cmd_unlink_voice  : ["unlink_Voice"],
+        cmd_make_room     : ["^make"],
+        cmd_link_voice    : ["^link"],
+        cmd_unlink_voice  : ["^unlink"],
         cmd_list_GM       : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^listGM", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistgm"],
         cmd_list_Dev      : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistDev", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistdev"],
         cmd_add_GM        : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^laddGM"],
