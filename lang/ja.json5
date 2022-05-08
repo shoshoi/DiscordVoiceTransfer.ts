@@ -3,34 +3,34 @@
         room_Werewolf    : "人狼役職",
         room_GameLog     : "ゲームログ",
         room_DebugLog    : "デバッグログ",
-        room_Living      : "生存者チャット",
-        room_LivingVoice : "生存者",
+        room_Living      : "チャット",
+        room_LivingVoice : "公開部屋",
         room_Dead        : "霊界チャット",
-        room_DeadVoice   : "霊界"
+        room_DeadVoice   : "聞き耳部屋"
     },
     sys : {
         cmd_make_room     : ["make_room"],
-        cmd_link_voice    : ["^linkVoice"],
-        cmd_unlink_voice  : ["^unlinkVoice"],
-        cmd_list_GM       : ["^listGM", "^listgm"],
-        cmd_list_Dev      : ["^listDev", "^listdev"],
-        cmd_add_GM        : ["^addGM"],
-        cmd_add_Dev       : ["^addDev"],
-        cmd_rm_GM         : ["^rmGM"],
-        cmd_rm_Dev        : ["^rmDev"],
-        cmd_role_num      : ["^RoleNum"],
-        cmd_reload_rule   : ["^reload_rule"],
-        cmd_member_list   : ["参加者", "^list"],
-        cmd_change_rule   : ["^ch_rule", "^chRule", "^chrule"],
+        cmd_link_voice    : ["link_Voice"],
+        cmd_unlink_voice  : ["unlink_Voice"],
+        cmd_list_GM       : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^listGM", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistgm"],
+        cmd_list_Dev      : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistDev", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^llistdev"],
+        cmd_add_GM        : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^laddGM"],
+        cmd_add_Dev       : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^laddDev"],
+        cmd_rm_GM         : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lrmGM"],
+        cmd_rm_Dev        : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lrmDev"],
+        cmd_role_num      : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lRoleNum"],
+        cmd_reload_rule   : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lreload_rule"],
+        cmd_member_list   : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^l参加者", "^list"],
+        cmd_change_rule   : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lch_rule", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lchRule", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lchrule"],
 
 
-        cmd_update_perm  : ["^update_perm"],
-        cmd_stop_timer   : ["タイマー停止", "^stop", "^pause"],　// タイマー停止
-        cmd_resume_timer : ["タイマー再開", "^resume"],        // タイマー再開
-        cmd_extend_time  : ["^extend_time"],   // 時間延長希望
-        cmd_cut_time     : ["^cut_time"],      // 時短延長希望
+        cmd_update_perm  : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lupdate_perm"],
+        cmd_stop_timer   : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lタイマー停止", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lstop", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lpause"],　// タイマー停止
+        cmd_resume_timer : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lタイマー再開", "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lresume"],        // タイマー再開
+        cmd_extend_time  : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lextend_time"],   // 時間延長希望
+        cmd_cut_time     : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lcut_time"],      // 時短延長希望
 
-        cmd_addtime     : ["^extend"],
+        cmd_addtime     : ["^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^lextend"],
 
         sym_err       : ":x:",
         sym_warn      : ":warning:",
