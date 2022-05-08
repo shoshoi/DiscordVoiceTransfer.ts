@@ -9,7 +9,7 @@
   http : {
     addr      : "$DISCORD_WEREWOLF_HTTP_ADDR",
     ip        : "$DISCORD_WEREWOLF_HTTP_IP",
-    http_port : "$DISCORD_WEREWOLF_HTTP_PORT",
+    http_port : "$PORT",
     template_dir : "./http_template",
     game_html    : "circle.html",
     white_list    : [
