@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import {LangType, ServerSettingsType} from "./JsonType";
 import * as WebSocket from 'ws'
-import GameState, {KickReason, Phase} from "./GameState"
+import GameState from "./GameState"
 
 function dummyHttpRequestReceiver(obj : HttpServer, request: IncomingMessage, response: ServerResponse){
     obj.httpRequest(request, response);
@@ -85,8 +85,10 @@ export class HttpServer {
         return this.getHttpURL() + this.config.http.game_html + '?room=' + sid;
     }
     destroySession(sid : string){
-        this.games[sid].destroy();
-        delete this.games[sid];
+        if(this.games[sid] != null){
+            this.games[sid].destroy();
+            delete this.games[sid];
+        }
     }
 }
 
@@ -133,7 +135,6 @@ export class HttpGameState {
     }
     addSubscribers(ws : WebSocket, id : string | null){
         this.subscribers.push(new Session(ws, id));
-        this.updateMembers();
     }
     wsSend(message : string){
         // console.log("wsSend", message);
@@ -148,83 +149,7 @@ export class HttpGameState {
             }
         })
     }
-    getUsernameB64fromUid(uid : string){
-        
-        const m = this.game.members[uid].member;
-        if(m != null){
-            const n = m.nickname;
-            if(n != null) {
-                return (Buffer.from(n, 'utf8')).toString('base64');
-            }
-        }
-        return (Buffer.from(this.game.members[uid].user.username, 'utf8')).toString('base64');
-    }
-
-    getUserStateLD(uid : string){
-        if(this.game.members[uid].isLiving == false){
-            if(this.game.members[uid].deadReason == KickReason.Vote){
-                return 'd';
-            } else {
-                return 'k';
-            }
-        }
-        return 'l'
-    }
     
-    getUserdataStr(uid : string){
-        const nameb = this.getUsernameB64fromUid(uid);
-        const bid = this.uid2bid[uid];
-        const nsd = this.userState[bid];
-        return bid + "," + nsd.isLiving + nsd.isSpeaking + "," + nameb + "," + this.game.members[uid].avatar;
-    }
-    getUserdataJson(uid : string) {
-        let res : {[key: string]: any} = {};
-        const bid = this.uid2bid[uid];
-        const nsd = this.userState[bid];
-        res["isLiving"]   = nsd.isLiving;
-        res["isSpeaking"] = nsd.isSpeaking;
-        res["nameb"]      = this.getUsernameB64fromUid(uid);
-        res["avatar"]     = this.game.members[uid].avatar;
-        const coRole      = this.game.members[uid].coRole;
-        res["co"]         = !coRole ? "" : this.langTxt.role_img[coRole];
-        const role        = this.game.members[uid].role;
-        res["role"]       = (role == null || this.game.phase != Phase.p7_GameEnd ? "" : this.langTxt.role_img[role]);
-        res["call"]       = [];
-        for(const p of this.game.members[uid].callLog){
-            res["call"].push([this.uid2bid[p[0]], p[1]]);
-        }
-        return res;
-    }
-    updateMembers(){
-        let message : {members : {[key: string]: any}, phase : string, isGameEnd : Boolean} 
-                = {members : {}, phase : this.phaseName, isGameEnd : this.game.phase == Phase.p7_GameEnd};
-        for(const uid in this.game.members){
-            let bid;
-            if(!(uid in this.uid2bid)){
-                bid = this.nextBid.toString(10);
-                this.uid2bid[uid] = bid;
-                this.bid2uid[bid] = uid;
-                this.userState[bid] = new UserState();
-                this.userState[bid].isLiving = this.getUserStateLD(uid);
-                this.nextBid++;
-            } else {
-                bid = this.uid2bid[uid];
-                const s = this.getUserStateLD(uid);
-                this.userState[bid].isLiving = s;
-            }
-            message.members[bid] = this.getUserdataJson(uid);
-        }
-        const messageJson = JSON.stringify(message);
-        console.log(messageJson);
-        for(const bid in this.bid2uid){
-            const uid = this.bid2uid[bid];
-            if(uid in this.game.members) continue;
-            delete this.uid2bid[uid];
-            delete this.bid2uid[bid];
-            delete this.userState[bid];
-        }
-        this.wsSend(messageJson);
-    }
     updateMemberSpeaking(uid : string){
         if(!(uid in this.uid2bid)) return;
         const bid = this.uid2bid[uid];
@@ -250,9 +175,5 @@ export class HttpGameState {
     updatePhase(p : string){
         this.phaseName = p;
         this.wsSend('p' + p);
-    }
-    updateTimer(){
-        let message = "t" + this.game.remTime;
-        this.wsSend(message);
     }
 }

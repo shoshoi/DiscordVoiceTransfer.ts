@@ -18,26 +18,4 @@
       "style.css",
     ]
   },
-
-  se : {
-    times : [
-      [300, "./media/david.ja/nokori5min.wav"],
-      [180, "./media/david.ja/nokori3min.wav"],
-      [ 60, "./media/david.ja/nokori1min.wav"],
-      [ 30, "./media/david.ja/nokori30sec.wav"],
-      [ 10, "./media/david.ja/nokori10sec.wav"],
-    ],
-    co    : "./media/david.ja/co.wav",
-    call  : "./media/david.ja/call.wav",
-  },
-
-  music :{
-    opening     : "_",
-    first_night : "_",
-    day_time    : "_",
-    vote        : "_",
-    night       : "_",
-    good_win    : "_",
-    evil_win    : "_",
-  },
 }

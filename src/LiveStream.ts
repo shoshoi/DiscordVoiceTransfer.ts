@@ -1,6 +1,5 @@
 import * as Discord from "discord.js";
-import {GameChannels} from "./GameUtils"
-import {LangType, RuleType} from "./JsonType";
+import {LangType} from "./JsonType";
 import {HttpGameState} from "./HttpServer"
 import {Readable} from "stream";
 import * as AudioMixer from "audio-mixer";
@@ -131,8 +130,8 @@ class RealtimeFsWavStream extends Readable{
 
 
 export default class LiveStream {
-    channels  : GameChannels;
-    channels2 : GameChannels;
+    channels  : Discord.VoiceChannel;
+    channels2 : Discord.VoiceChannel;
     liveMixer   : AudioMixer.Mixer | null = null;
     audioMixer  : AudioMixer.Mixer | null = null;
     dummyInput1  : AudioMixer.Input | null = null;
@@ -144,7 +143,7 @@ export default class LiveStream {
     bgmFileName  : string = "";
     bgmId        : number = 0;
     httpGameState   : HttpGameState;
-    constructor(ch : GameChannels, ch2 : GameChannels, httpGameState : HttpGameState, SrvLangTxt : LangType, SrvRoleSetting : RuleType) {
+    constructor(ch : Discord.VoiceChannel, ch2 : Discord.VoiceChannel, httpGameState : HttpGameState, SrvLangTxt : LangType,) {
         this.channels = ch
         this.channels2 = ch2
         this.httpGameState = httpGameState;
@@ -251,7 +250,7 @@ export default class LiveStream {
         if(this.conn1 != null) return false;
         if(this.conn2 != null) return false;
 
-        const conn2 = await this.channels2.DeadVoice.join().catch((e)=>{
+        const conn2 = await this.channels2.join().catch((e)=>{
             console.error(e);
             console.trace();
             console.error("Error Catch!");
@@ -268,7 +267,7 @@ export default class LiveStream {
         this.audioMixer =  mixer;
         
         /////////////////////////////////////////////////////////////////////////
-        const conn1 = await this.channels.LivingVoice.join().catch((e)=>{
+        const conn1 = await this.channels.join().catch((e)=>{
             console.error(e);
             console.trace();
             console.error("Error Catch!");
