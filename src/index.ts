@@ -312,7 +312,7 @@ async function on_message(bid : number, message : Discord.Message){
             }
         }
         if(isThisCommand(message.content, SrvLangTxt.sys.cmd_make_room) >= 0){
-            const u = clients[0].user;
+            const u = clients[1].user;
             if(message.mentions.users.find(mu => mu.id == u.id) == null) return;
             const guild1_old = message.guild;
             if (guild1_old == null) return;
