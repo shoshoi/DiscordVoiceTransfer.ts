@@ -44,6 +44,8 @@ const enum Perm {NoAccess, ReadOnly, ViewOnly, RW, Admin}
 
 export default class GameState {
     clients      : Discord.Client[];
+    cmember        : Discord.GuildMember;
+    cmember2        : Discord.GuildMember;
     guild        : Discord.Guild;
     guild2       : Discord.Guild;
     srvSetting   : ServerSettingsType;
@@ -61,8 +63,10 @@ export default class GameState {
 
     httpGameState   : HttpGameState;
 
-    constructor(clients : Discord.Client[], upperGames : {[key: string]: GameState | null}, guild : Discord.Guild, guild2 : Discord.Guild, tch : Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel, ch : Discord.VoiceChannel, ch2 : Discord.VoiceChannel, parentID : string, httpServer : HttpServer, srvLangTxt : LangType, srvSetting : ServerSettingsType) {
+    constructor(clients : Discord.Client[], cmember: Discord.GuildMember, cmember2: Discord.GuildMember, upperGames : {[key: string]: GameState | null}, guild : Discord.Guild, guild2 : Discord.Guild, tch : Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel, ch : Discord.VoiceChannel, ch2 : Discord.VoiceChannel, parentID : string, httpServer : HttpServer, srvLangTxt : LangType, srvSetting : ServerSettingsType) {
         this.clients     = clients;
+        this.cmember      = cmember;
+        this.cmember2      = cmember2;
         this.upperGames  = upperGames;
         this.guild       = guild;
         this.guild2      = guild2;
@@ -135,7 +139,27 @@ export default class GameState {
         this.destroy();
     }
     checkIdle(){
-        const member = this.channels.members.array.length + this.channels2.members.array.length
+        var member = 0;
+        
+        if (this.cmember.voice.channel != null){
+            for(var key of this.cmember.voice.channel.members.keys()){
+                member += 1;
+            }
+        }else{
+            this.voiceChannelsUnlink();
+            return 1;
+        }
+        if (this.cmember2.voice.channel != null ){
+            if(this.cmember.voice.channel.id != this.cmember2.voice.channel.id){
+                for(var key of this.cmember2.voice.channel.members.keys()){
+                    member += 1;
+                }
+            }
+        }else{
+            this.voiceChannelsUnlink();
+            return 1;
+        }
+        
         if(member > 2){
             this.prevDate = new Date();
         }else{

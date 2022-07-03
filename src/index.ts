@@ -193,21 +193,23 @@ async function on_message(bid : number, message : Discord.Message){
                 if(Object.keys(Games).find((v : string ) => v == paID) != null){
                     if(Games[paID] != null){
                         await Games[paID]!.command(message);
+                        return;
                     }else{
                         // nullのとき
                     }
-                    return;
                 }
                 if(guild1 != null){
                     let guild2 = clients[1].guilds.cache.find(g => g.id == guild1.id);
                     if(guild2 != null){
                         const member1 = await guild1.members.fetch(message.author.id);
                         const member2 = await guild2.members.fetch(message.author.id);
+                        const cmember1 = await guild1.members.fetch(clients[0].user.id);
+                        const cmember2 = await guild2.members.fetch(clients[1].user.id);
                         const voice_channel = member1.voice.channel;
                         const voice_channel2 = member2.voice.channel;
                         const text_channel = message.channel;
                         if(voice_channel != null && voice_channel2 != null && text_channel != null){
-                            Games[paID] = new GameState(clients, Games, message.guild, guild2, text_channel, voice_channel, voice_channel2, paID, httpServer, SrvLangTxt, ServerSetting);
+                            Games[paID] = new GameState(clients, cmember1, cmember2, Games, message.guild, guild2, text_channel, voice_channel, voice_channel2, paID, httpServer, SrvLangTxt, ServerSetting);
                             await Games[paID]!.command(message);
                         }else{
                             message.channel.send(SrvLangTxt.sys.Connect_Voice_Err);
