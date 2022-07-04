@@ -4,6 +4,7 @@
   token2          : "$DISCORD_WEREWOLF_BOT_TOKEN_2",
 
   auto_voice_link : true,
+  enable_http_server : "$DISCORD_WEREWOLF_ENABLE_HTTP_SERVER",
   system_GM  : ["$DISCORD_WEREWOLF_SYSTEM_GM"],
 
   http : {

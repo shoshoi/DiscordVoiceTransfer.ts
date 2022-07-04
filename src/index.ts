@@ -3,6 +3,7 @@ import * as fs from "fs"
 import * as argv from "argv"
 import {isValid, JsonRuntimeType, validate} from 'ts-json-validator';
 import {LangTypeFormat, LangType,  ServerSettingsFormat} from "./JsonType";
+import {HttpServer} from "./HttpServer"
 import GuildState from "./GuildState";
 import {isThisCommand} from "./Utils"
 const JSON5 = require('json5');
@@ -34,6 +35,9 @@ const Games: { [key: string]: GuildState | null; } = {};
 clients[0].on("ready", () => {console.log("Login! ", clients[0].user ? clients[0].user.username : "");});
 clients[1].on("ready", () => {console.log("Login! ", clients[1].user ? clients[1].user.username : "");});
 
+if (ServerSetting.enable_http_server == "true"){
+    const httpServer = new HttpServer(ServerSetting, SysLangTxt);
+}
 
 function loadAndSetSysLangTxt(path : string, LangTxt ?: LangType){
     const data = fs.readFileSync(path, 'utf-8');
@@ -131,6 +135,7 @@ function loadAndSetServerSetting(default_path : string, server_setting_files : a
     if (res == null) throw new Error('ServerSetting is Wrong!');
     res.token1 = get_env(res.token1);
     res.token2 = get_env(res.token2);
+    res.enable_http_server = get_env(res.enable_http_server);
     res.http.addr = get_env(res.http.addr);
     res.http.ip        = get_env(res.http.ip);
     res.http.http_port = get_env(res.http.http_port);

@@ -38,6 +38,7 @@ export const ServerSettingsFormat = obj({
     token1          : str,
     token2          : str,
     auto_voice_link : bool,
+    enable_http_server : str,
     system_GM       : arr(str),
     
     http
