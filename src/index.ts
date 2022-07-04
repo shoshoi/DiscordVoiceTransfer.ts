@@ -4,6 +4,7 @@ import * as argv from "argv"
 import {isValid, JsonRuntimeType, validate} from 'ts-json-validator';
 import {LangTypeFormat, LangType,  ServerSettingsFormat} from "./JsonType";
 import GuildState from "./GuildState";
+import {isThisCommand} from "./Utils"
 const JSON5 = require('json5');
 const util = require('util');
 
@@ -184,10 +185,12 @@ async function on_message(bid : number, message : Discord.Message){
             if(message.guild && (message.mentions.users.find(mu => mu.id == u.id) || rolecheck)){
                 const guild1 = message.guild;
                 const member1 = await guild1.members.fetch(message.author.id);
-                if(member1.voice.channel == null){
+
+                if(member1.voice.channel == null && isThisCommand(message.content, SrvLangTxt.sys.cmd_disconnect_voice) < 0){
                     message.channel.send(SrvLangTxt.sys.Unconnect_Voice_Err);
                     return;
                 }
+
                 if(Object.keys(Games).find((v : string ) => v == paID) != null){
                     if(Games[paID] != null){
                         await Games[paID]!.command(message);

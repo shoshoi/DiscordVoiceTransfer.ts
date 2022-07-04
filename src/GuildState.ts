@@ -100,7 +100,6 @@ export default class GuildState {
             return;
         }
         if(isThisCommand(message.content, this.langTxt.sys.cmd_disconnect_voice) >= 0){
-            await this.voiceChannelsLink();
             this.voiceChannelsUnlink();
             return;
         }
