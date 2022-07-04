@@ -3,8 +3,7 @@ import * as fs from "fs"
 import * as argv from "argv"
 import {isValid, JsonRuntimeType, validate} from 'ts-json-validator';
 import {LangTypeFormat, LangType,  ServerSettingsFormat} from "./JsonType";
-import GameState from "./GameState"
-import {HttpServer} from "./HttpServer"
+import GuildState from "./GuildState";
 const JSON5 = require('json5');
 const util = require('util');
 
@@ -29,12 +28,11 @@ const SysLangTxt = loadAndSetSysLangTxt("./lang/" + ServerSetting.system_lang + 
 if (SysLangTxt    == null) { throw new Error('SysLangTxt is Wrong! lang:' + ServerSetting.system_lang);}
 
 const clients = [new Discord.Client(), new Discord.Client()];
-const Games: { [key: string]: GameState | null; } = {};
+const Games: { [key: string]: GuildState | null; } = {};
 
 clients[0].on("ready", () => {console.log("Login! ", clients[0].user ? clients[0].user.username : "");});
 clients[1].on("ready", () => {console.log("Login! ", clients[1].user ? clients[1].user.username : "");});
 
-const httpServer : HttpServer = new HttpServer(ServerSetting, SysLangTxt);
 
 function loadAndSetSysLangTxt(path : string, LangTxt ?: LangType){
     const data = fs.readFileSync(path, 'utf-8');
@@ -209,7 +207,7 @@ async function on_message(bid : number, message : Discord.Message){
                         const voice_channel2 = member2.voice.channel;
                         const text_channel = message.channel;
                         if(voice_channel != null && voice_channel2 != null && text_channel != null){
-                            Games[paID] = new GameState(clients, cmember1, cmember2, Games, message.guild, guild2, text_channel, voice_channel, voice_channel2, paID, httpServer, SrvLangTxt, ServerSetting);
+                            Games[paID] = new GuildState(clients, cmember1, cmember2, Games, message.guild, guild2, text_channel, voice_channel, voice_channel2, SrvLangTxt, ServerSetting);
                             await Games[paID]!.command(message);
                         }else{
                             message.channel.send(SrvLangTxt.sys.Connect_Voice_Err);

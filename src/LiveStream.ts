@@ -1,6 +1,5 @@
 import * as Discord from "discord.js";
 import {LangType} from "./JsonType";
-import {HttpGameState} from "./HttpServer"
 import {Readable} from "stream";
 import * as AudioMixer from "audio-mixer";
 import * as fs from "fs"
@@ -72,63 +71,6 @@ class RealtimeWaveStream extends Readable{
     }
 }
 
-
-class RealtimeFsWavStream extends Readable{
-    opend       : boolean = false;
-    rateUnknown : boolean = true;
-    interval_ms : number = 16384 * 1000 / 192000; // = 85.333[ms]
-    chunkSize   : number = 20480; //  192000[Byte/sec]
-    next_time   : number = 0;
-    constructor(fname : string, wreader : wav.Reader) {
-        super({
-          objectMode: true
-        });
-        const fst = fs.createReadStream(fname);
-        const dummyThis = this;
-        fst.on("error", (e) => {
-            console.log(e);
-        })
-        fst.on("readable", () =>{
-            if(dummyThis.opend) return;
-            dummyThis.opend = true;
-            dummyThis.next_time = Date.now();
-            const func = () =>{
-                const b = fst.read(dummyThis.chunkSize);
-                dummyThis.push(b);
-                if(dummyThis.destroyed) {
-                    fst.close();
-                }else if(dummyThis.rateUnknown){
-                    const r = wreader as any;
-                    if("byteRate" in r){
-                        const rate = r.byteRate;
-                        if(typeof(rate) === 'number' &&  rate > 0){
-                            console.log("rate : ", rate);
-                            dummyThis.setRate(rate);
-                            dummyThis.rateUnknown = false;
-                        }
-                    }
-                    if(b !== null){
-                        func();
-                    }
-                } else {
-                    if(b !== null){
-                        dummyThis.next_time += dummyThis.interval_ms;
-                        setTimeout(func, dummyThis.next_time - Date.now());
-                    }
-                }
-            };
-            setTimeout(func, 0);
-        });
-    }
-    setRate(r : number){
-        this.chunkSize = r * this.interval_ms / 1000;
-    }
-    _read(size : number) {
-    }
-}
-
-
-
 export default class LiveStream {
     channels  : Discord.VoiceChannel;
     channels2 : Discord.VoiceChannel;
@@ -137,16 +79,9 @@ export default class LiveStream {
     dummyInput1  : AudioMixer.Input | null = null;
     conn1        : Discord.VoiceConnection  | null = null;
     conn2        : Discord.VoiceConnection  | null = null;
-    bgmInput     : AudioMixer.Input | null = null;
-    bgmInput2    : AudioMixer.Input | null = null;
-    bgmFile      : RealtimeFsWavStream | null = null;
-    bgmFileName  : string = "";
-    bgmId        : number = 0;
-    httpGameState   : HttpGameState;
-    constructor(ch : Discord.VoiceChannel, ch2 : Discord.VoiceChannel, httpGameState : HttpGameState, SrvLangTxt : LangType,) {
+    constructor(ch : Discord.VoiceChannel, ch2 : Discord.VoiceChannel, SrvLangTxt : LangType,) {
         this.channels = ch
         this.channels2 = ch2
-        this.httpGameState = httpGameState;
     }
     reset(){}
     destroy(){
@@ -155,93 +90,11 @@ export default class LiveStream {
         if(this.dummyInput1) this.dummyInput1.destroy();
         if(this.conn1      ) this.conn1.disconnect();
         if(this.conn2      ) this.conn2.disconnect();
-        if(this.bgmInput   ) this.bgmInput.destroy();
-        if(this.bgmInput2  ) this.bgmInput2.destroy();
-        if(this.bgmFile    ) this.bgmFile.destroy();
         this.liveMixer = null  
         this.audioMixer = null 
         this.dummyInput1 = null
         this.conn1 = null      
         this.conn2 = null      
-        this.bgmInput = null   
-        this.bgmInput2 = null  
-        this.bgmFile = null
-    }
-    loopBGM(name : string, bid : number, obj : LiveStream){
-        if(name == obj.bgmFileName){
-            obj.setBGM(name);
-        }
-    }
-    setBGM(name : string){
-        console.log("setBGM", name);
-        if(this.liveMixer == null) return;
-        if(this.audioMixer == null) return;
-        if(this.bgmInput  != null) {
-            this.liveMixer.removeInput(this.bgmInput)
-            this.bgmInput = null;
-        }
-        if(this.bgmFile  != null) {
-            this.bgmFile.destroy();
-        }
-        if(name == "") return;
-
-        this.bgmInput = new AudioMixer.Input({
-            channels: 2, bitDepth: 16,
-            sampleRate: 48000, volume    : 5
-        });
-        this.liveMixer.addInput(this.bgmInput);
-
-
-        const bid = Math.floor(Math.random() * 0x40000000) + 1;
-        this.bgmFileName = name;
-        this.bgmId = bid;
-        const dummyThis = this;
-        
-        const bgmReader = new wav.Reader()
-        const bgmFile = new RealtimeFsWavStream(name, bgmReader);
-        this.bgmFile = bgmFile;
-
-        bgmReader.on('readable', () => {
-            dummyThis.loopBGM(name, bid, dummyThis);
-        });
-        bgmReader.on('format', () => {
-            if(this.bgmInput  == null) return;
-            bgmReader.pipe(this.bgmInput);
-        });
-        bgmFile.pipe(bgmReader);
-        const sleep = (msec : number) => new Promise(resolve => setTimeout(resolve, msec));
-    }
-    playSe(name : string){
-        if(this.liveMixer == null) return;
-
-        const fst = fs.createReadStream(name);
-        fst.on("error", (e) => {
-            console.log(e);
-        })
-        const seWavReader = new wav.Reader()
-        fst.pipe(seWavReader);
-        console.log("play SE", name);
-        seWavReader.once('readable', ()=>{
-            const r = seWavReader as any;
-            const channels   = r.channels;
-            const sampleRate = r.sampleRate;
-            const bitDepth   = r.bitDepth
-            const lenMs        = r.chunkSize * 1000 / r.byteRate;
-            if(channels == null || sampleRate == null || bitDepth == null || lenMs == null) return;
-            if(this.liveMixer == null) return;
-            const seInput = new AudioMixer.Input({
-                channels: channels, bitDepth: bitDepth, sampleRate: sampleRate, volume : 100
-            });
-            seWavReader.pipe(seInput);
-            this.liveMixer.addInput(seInput);
-
-            setTimeout(()=>{
-                if(this.liveMixer == null) return;
-                this.liveMixer.removeInput(seInput);
-                const m : any = this.liveMixer;
-                console.log("se fin", m.inputs.length);
-            }, lenMs);
-        })
     }
     async connectVoice() {
         if(this.dummyInput1 != null) return false;
@@ -289,12 +142,6 @@ export default class LiveStream {
         dummyStream1.pipe(dummyInput1);
         
         conn1.play(this.liveMixer, {type:'converted'});
-        
-        this.bgmInput2 = new AudioMixer.Input({
-            channels: 2, bitDepth: 16, sampleRate: 48000, volume    : 100
-        });
-        mixer.addInput(this.bgmInput2);
-        this.liveMixer.pipe(this.bgmInput2);
 
         conn1.on('speaking', (user, speaking) => {
                     if(user == null){
@@ -305,7 +152,6 @@ export default class LiveStream {
                     if (user.bot) return
                     if (speaking) {
                         // console.log(`I'm listening to ${user.username}`);
-                        this.httpGameState.updateMemberSpeaking(user.id);
                         if (this.audioMixer == null){
                             console.log("audioMixer is null");
                         } else {
@@ -322,7 +168,6 @@ export default class LiveStream {
                             audioStream.on('end', () => {
                                 if (this.audioMixer != null){
                                     this.audioMixer.removeInput(standaloneInput);
-                                    this.httpGameState.updateMemberNospeaking(user.id);
                                     //console.log(`I'm no longer listening to ${user.username}`);
                                     standaloneInput.destroy();
                                     audioStream.destroy();
