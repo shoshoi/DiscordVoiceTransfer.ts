@@ -2,7 +2,9 @@ import http, {IncomingMessage, ServerResponse} from 'http'
 import * as fs from 'fs'
 import * as path from 'path'
 import {LangType, ServerSettingsType} from "./JsonType";
-import * as WebSocket from 'ws'
+const Log4js = require("log4js");
+Log4js.configure("log-config.json");
+const logger = Log4js.getLogger("system");
 
 function dummyHttpRequestReceiver(obj : HttpServer, request: IncomingMessage, response: ServerResponse){
     obj.httpRequest(request, response);
@@ -24,7 +26,8 @@ export class HttpServer {
         });
         
         this.server.listen(config.http.http_port, parseInt(config.http.ip), function () {});
-        console.log(`A web server has been started : http://${config.http.ip}:${config.http.http_port}/`);
+        
+        logger.info(`A web server has been started : http://${config.http.ip}:${config.http.http_port}/`);
     }
     getHttpURL(){
         return `http://${this.config.http.addr}:${this.config.http.http_port}/`;

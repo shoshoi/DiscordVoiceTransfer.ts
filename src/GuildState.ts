@@ -3,6 +3,9 @@ import * as Discord from "discord.js";
 import LiveStream     from "./LiveStream"
 import {isThisCommand} from "./Utils"
 import {LangType, ServerSettingsType} from "./JsonType";
+const Log4js = require("log4js");
+Log4js.configure("log-config.json");
+const logger = Log4js.getLogger("system");
 
 export default class GuildState {
     clients      : Discord.Client[];
@@ -44,7 +47,7 @@ export default class GuildState {
     }
 
     err(){
-        console.error("An error has occurred.");
+        logger.error("An error has occurred.");
         console.trace();
         this.textChannel.send("An error has occurred...");
     }

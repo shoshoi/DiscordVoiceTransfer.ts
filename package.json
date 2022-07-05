@@ -13,6 +13,7 @@
   "dependencies": {
     "@discordjs/voice": "^0.10.0",
     "@types/argv": "0.0.4",
+    "@types/log4js": "^2.3.5",
     "@types/node": "^12.12.37",
     "@types/wav": "^1.0.0",
     "@types/ws": "^7.2.3",

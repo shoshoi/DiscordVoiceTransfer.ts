@@ -8,7 +8,9 @@ import GuildState from "./GuildState";
 import {isThisCommand} from "./Utils"
 const JSON5 = require('json5');
 const util = require('util');
-
+const Log4js = require("log4js");
+Log4js.configure("log-config.json");
+const logger = Log4js.getLogger("system");
 
 argv.option([
     {
@@ -21,19 +23,16 @@ argv.option([
 ]);
 const arg = argv.run();
 
-
 const ServerSetting = loadAndSetServerSetting('./server_settings/default.json5', arg.options["server_setting"]);
-// console.log("ServerSetting", ServerSetting)
-
 const SysLangTxt = loadAndSetSysLangTxt("./lang/" + ServerSetting.system_lang + ".json5");
 
 if (SysLangTxt    == null) { throw new Error('SysLangTxt is Wrong! lang:' + ServerSetting.system_lang);}
 
 const clients = [new Discord.Client(), new Discord.Client()];
-const Games: { [key: string]: GuildState | null; } = {};
+const Guilds: { [key: string]: GuildState | null; } = {};
 
-clients[0].on("ready", () => {console.log("Login! ", clients[0].user ? clients[0].user.username : "");});
-clients[1].on("ready", () => {console.log("Login! ", clients[1].user ? clients[1].user.username : "");});
+clients[0].on("ready", () => {logger.info("Login! ", clients[0].user ? clients[0].user.username : "");});
+clients[1].on("ready", () => {logger.info("Login! ", clients[1].user ? clients[1].user.username : "");});
 
 if (ServerSetting.enable_http_server == "true"){
     const httpServer = new HttpServer(ServerSetting, SysLangTxt);
@@ -47,7 +46,7 @@ function loadAndSetSysLangTxt(path : string, LangTxt ?: LangType){
         if(ret != null) LangTxt = ret;
         return ret;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
     }
 }
 
@@ -105,9 +104,9 @@ function isValidJsonRuntimeType(runtimeType: JsonRuntimeType, obj: any): boolean
             break;
         }
     }
-    console.error("runtimeType :", runtimeType);
-    console.error("obj type    :", typeof obj);
-    console.error("obj         :", obj);
+    logger.error("runtimeType :", runtimeType);
+    logger.error("obj type    :", typeof obj);
+    logger.error("obj         :", obj);
     throw new Error("Json Type parse error!!");
 }
 
@@ -163,10 +162,8 @@ async function on_message(bid : number, message : Discord.Message){
         message.channel.send("pong!"); return;
     }
     if(bid == 1) return;
-    // console.log("text > ", message.content);
     
     const message_channel = message.channel;
-
     if(SysLangTxt != null && ('parentID' in message_channel)){
         const SrvLangTxt : LangType = SysLangTxt;
         const paID = message_channel.parentID;
@@ -196,12 +193,10 @@ async function on_message(bid : number, message : Discord.Message){
                     return;
                 }
 
-                if(Object.keys(Games).find((v : string ) => v == paID) != null){
-                    if(Games[paID] != null){
-                        await Games[paID]!.command(message);
+                if(Object.keys(Guilds).find((v : string ) => v == paID) != null){
+                    if(Guilds[paID] != null){
+                        await Guilds[paID]!.command(message);
                         return;
-                    }else{
-                        // nullのとき
                     }
                 }
                 if(guild1 != null){
@@ -215,8 +210,8 @@ async function on_message(bid : number, message : Discord.Message){
                         const voice_channel2 = member2.voice.channel;
                         const text_channel = message.channel;
                         if(voice_channel != null && voice_channel2 != null && text_channel != null){
-                            Games[paID] = new GuildState(clients, cmember1, cmember2, Games, message.guild, guild2, text_channel, voice_channel, voice_channel2, SrvLangTxt, ServerSetting);
-                            await Games[paID]!.command(message);
+                            Guilds[paID] = new GuildState(clients, cmember1, cmember2, Guilds, message.guild, guild2, text_channel, voice_channel, voice_channel2, SrvLangTxt, ServerSetting);
+                            await Guilds[paID]!.command(message);
                         }else{
                             message.channel.send(SrvLangTxt.sys.Connect_Voice_Err);
                         }
@@ -229,31 +224,22 @@ async function on_message(bid : number, message : Discord.Message){
     }
 }
 
-async function release_games(){
+async function release_guilds(){
     setInterval(() => {
         let keys = new Array();
-        for (let key in Games) {
-            if(Games[key] != null){
-                const result = Games[key]!.checkIdle();
-                if(result == 1) Games[key] = null;
-            }else{
-                //nullのとき
+        for (let key in Guilds) {
+            if(Guilds[key] != null){
+                const result = Guilds[key]!.checkIdle();
+                if(result == 1) Guilds[key] = null;
             }
         }
-        /*
-        console.log(Object.keys(Games));
-        console.log(keys);
-        for (let key in keys){
-            console.log(Games[key].remove());
-            
-        }*/
     }, 1000 * 10);
 }
 
 
 clients[0].on("message", async message => await on_message(0, message));
 clients[1].on("message", async message => await on_message(1, message));
-clients[0].on("ready",   async () => await release_games());
+clients[0].on("ready",   async () => await release_guilds());
 
 
 const token1 = ServerSetting.token1;

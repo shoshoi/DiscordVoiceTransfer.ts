@@ -2,8 +2,9 @@ import * as Discord from "discord.js";
 import {LangType} from "./JsonType";
 import {Readable} from "stream";
 import * as AudioMixer from "audio-mixer";
-import * as fs from "fs"
-import * as wav from "wav"
+const Log4js = require("log4js");
+Log4js.configure("log-config.json");
+const logger = Log4js.getLogger("system");
 
 
 class RealtimeWaveStream extends Readable{
@@ -58,15 +59,9 @@ class RealtimeWaveStream extends Readable{
         const buf = this.buf;
         const dif = this.next_time - Date.now();
         setTimeout(() => {
-            //this.next_time = Date.now() + this.interval_ms;
             this.next_time += this.interval_ms;
             this.push(buf);
-            // this.samplesGenerated += this.base_numSamples;
-            // console.log("read", size, " samplesGenerated", this.samplesGenerated)
-		    //  if (this.samplesGenerated >= this.sampleRate * duration) {
-		    //  	// after generating "duration" second of audio, emit "end"
-		    //  	this.push(null);
-            //  }
+
         }, dif);
     }
 }
@@ -104,12 +99,12 @@ export default class LiveStream {
         if(this.conn2 != null) return false;
 
         const conn2 = await this.channels2.join().catch((e)=>{
-            console.error(e);
+            logger.error(e);
             console.trace();
-            console.error("Error Catch!");
+            logger.error("Error Catch!");
         });
         if(conn2 == null) return false;
-        console.log("join2");
+        logger.info("voice channel join.");
         const mixer =  new AudioMixer.Mixer({
             channels: 2,
             bitDepth: 16,
@@ -121,9 +116,9 @@ export default class LiveStream {
         
         /////////////////////////////////////////////////////////////////////////
         const conn1 = await this.channels.join().catch((e)=>{
-            console.error(e);
+            logger.error(e);
             console.trace();
-            console.error("Error Catch!");
+            logger.error("Error Catch!");
         });
         if(conn1 == null) return false;
         this.conn1 = conn1;
@@ -145,15 +140,13 @@ export default class LiveStream {
 
         conn1.on('speaking', (user, speaking) => {
                     if(user == null){
-                        console.log("user is null...", user, speaking);
+                        logger.error("user is null...", user, speaking);
                         return;
                     }
-                    // console.log(`Speaking ${user.username}`, speaking);
                     if (user.bot) return
                     if (speaking) {
-                        // console.log(`I'm listening to ${user.username}`);
                         if (this.audioMixer == null){
-                            console.log("audioMixer is null");
+                            logger.error("audioMixer is null");
                         } else {
                             const audioStream = conn1.receiver.createStream(user, {mode : "pcm"});
                             
@@ -168,7 +161,6 @@ export default class LiveStream {
                             audioStream.on('end', () => {
                                 if (this.audioMixer != null){
                                     this.audioMixer.removeInput(standaloneInput);
-                                    //console.log(`I'm no longer listening to ${user.username}`);
                                     standaloneInput.destroy();
                                     audioStream.destroy();
                                     p.destroy()
@@ -176,7 +168,6 @@ export default class LiveStream {
                             });
                         }
                     }else{
-                        //console.log(`no speak ${user.username}`);
                     }
         })
         return true;
