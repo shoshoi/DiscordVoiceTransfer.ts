@@ -34,7 +34,7 @@ const Guilds: { [key: string]: GuildState | null; } = {};
 clients[0].on("ready", () => {logger.info("Login! ", clients[0].user ? clients[0].user.username : "");});
 clients[1].on("ready", () => {logger.info("Login! ", clients[1].user ? clients[1].user.username : "");});
 
-if (ServerSetting.enable_http_server == "true"){
+if (ServerSetting.environment_heroku == "true"){
     const httpServer = new HttpServer(ServerSetting, SysLangTxt);
 }
 
@@ -49,7 +49,6 @@ function loadAndSetSysLangTxt(path : string, LangTxt ?: LangType){
         logger.error(e);
     }
 }
-
 
 function get_env(str : string){
     let res = "";
@@ -110,7 +109,6 @@ function isValidJsonRuntimeType(runtimeType: JsonRuntimeType, obj: any): boolean
     throw new Error("Json Type parse error!!");
 }
 
-
 function loadAndSetServerSetting(default_path : string, server_setting_files : any){
     var files : string[] = [default_path];
     if(server_setting_files instanceof Array){
@@ -134,16 +132,14 @@ function loadAndSetServerSetting(default_path : string, server_setting_files : a
     if (res == null) throw new Error('ServerSetting is Wrong!');
     res.token1 = get_env(res.token1);
     res.token2 = get_env(res.token2);
-    res.enable_http_server = get_env(res.enable_http_server);
+    res.environment_heroku = get_env(res.environment_heroku);
     res.http.addr = get_env(res.http.addr);
     res.http.ip        = get_env(res.http.ip);
-    res.http.http_port = get_env(res.http.http_port);
-    let GMs : string[] = [];
-    for(const s of res.system_GM){
-        const t = get_env(s).split(' ');
-        GMs = GMs.concat(t);
+    if(res.environment_heroku == "true"){
+        res.http.http_port = get_env("$PORT");
+    }else{
+        res.http.http_port = get_env(res.http.http_port);
     }
-    res.system_GM = GMs;
     return res;
 }
 

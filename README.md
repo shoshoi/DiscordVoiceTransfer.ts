@@ -1,59 +1,61 @@
 
-Discord 上で人狼ゲームを行うための GM bot です．
+Discordのボイスチャットの音声を、別のボイスチャットに転送するBOTです。
 
-主にボイス人狼(ボイスチャットを用いた人狼) を想定した bot です．  
-しかしボイスチャンネルを使わずにテキストチャンネルのみの使用，または ボイスチャンネルをBGMや効果音を聞く専用とし，マイクミュートで使用しても楽しめます．
+このBOTは、TumoiYorozu様のDiscordWerewolf.ts（Discord 上で人狼ゲームを行うための GM bot）を改造して制作しています。
+https://github.com/TumoiYorozu/DiscordWerewolf.ts
 
-詳しくは [wikiページ](../../wiki/) を御覧ください．
+# インストール方法
+## Discord Bot のアクセストークンの準備
+以下のページから Bot の作成とトークンを入手してください．Bot は 2体必要なので2つ作成してください．
+(ボイスチャットとボイスチャットをつなぐ時，1BOT 1ボイチャしか入れないので2つ必要) https://discordapp.com/developers/applications/me
 
-[インストール方法](../../wiki/インストール方法)
+詳しいやり方↓
+https://liginc.co.jp/370260
 
-[ゲームの進行](../../wiki/ゲームの進行)
+## CentOSでのインストール
+### 確認した環境
+CentOS 7.9
 
-[役職](../../wiki/役職)
+準備中
 
-[コマンド一覧](../../wiki/コマンド一覧)
+## Ubuntuでのインストール
+### 確認した環境
+Ubuntu 20.04.1
 
+### 必要パッケージのインストール．node 12 を使うために n 経由でインストール．apt で入れた node は削除
+sudo apt update
+sudo apt install -y nodejs npm git wget
+sudo npm install n -g
+sudo n 12.16.2 
+sudo apt purge -y nodejs npm
+exec $SHELL -l
 
-# 概要
+### TypeScript のインストール．Git clone．コンパイル
+sudo npm install -g typescript@4.1.3
+git clone https://github.com/jirno7pr/DiscordVoiceTransfer.ts.git
+cd DiscordVoiceTransfer.ts/
+npm install
+tsc
 
-Discord 上で人狼ゲームを行うための GM bot です．ゲームの進行を bot が完全に行ってくれるため進行役ユーザーを必要としません．  
-また，ゲーム中は閲覧権限・書き込み権限等の権限切り替えも bot が完全に行うため，「狼以外は狼チャットは見ないでね！」と言った紳士協定も必要ありません．  
+### 環境変数の設定（例）
+.bashrc ファイルを編集して環境変数を設定します．
+Ubuntu のターミナルから nano ~/.bashrc と打つと，ファイルの編集ができるので，一番下に
 
-ゲーム中に処刑され，霊界へ行っても霊界にいる人同士でのボイスチャットができ，また生存者の会話は霊界にも流れるため，生存者の考察を霊界でガヤを入れることも出来ます．（生存者は霊界チャット・ボイスは見れません）  
+export DISCORD_VOICE_TRANSFER_BOT_TOKEN_1="BOT1のトークン"
+export DISCORD_VOICE_TRANSFER_BOT_TOKEN_2="BOT2のトークン"
+export DISCORD_VOICE_TRANSFER_ENVIRONMENT_HEROKU="デプロイ先がherokuか 例 herokuの場合:true herokuでない場合:false"
+export DISCORD_VOICE_TRANSFER_HTTP_IP="BotをインストールしたPCのIPアドレス．例 192.168.1.2"
+export DISCORD_VOICE_TRANSFER_HTTP_ADDR="外部から接続するために表示するアドレス．例A 123.45.67.89, 例B hogehoge.com"
+export DISCORD_VOICE_TRANSFER_HTTP_PORT="1080"
+を追記します．
+「デプロイ先がherokuか」は、通常falseで良いです．herokuにデプロイする場合のみtrueを指定してください。
+「外部から接続するために表示するアドレス」はグローバルIP などを持っていればそれを設定すれば良いです．外部から接続できるアドレスを持っていない場合は DISCORD_VOICE_TRANSFER_HTTP_IP と同じや 127.0.0.1 (ローカル・ループバック・アドレス：自分自身にアクセスするアドレス)を設定しておけば良いです．
 
-また，ボイスチャットには各フェーズごとに BGM も流れているため，雰囲気を楽しむことも出来ます．ボイス人狼でなくても BGM を聞く為だけに マイクミュートでチャット人狼しても良いでしょう．
+ファイルを編集する際，nano の場合， Ctrl+O で保存の確認されるので Enter で保存されます．保存完了後，Ctrl+X で nano を終了できます．
+ターミナルを再起動するか，source ~/.bashrc と打つことで環境変数の設定が反映されます．
+変数がちゃんと反映されているか確認するには，例えば
+echo $DISCORD_VOICE_TRANSFER_BOT_TOKEN_1
+と打ち，設定したトークンが表示されれば完了です．
 
-![](../../wiki/img/desc/make_room2.jpg)
-
-![](../../wiki/img/desc/fin1.jpg)
-
-
-
-また，今システムでは「ブラウザモニター」が実装されています．  
-ゲーム内のコマンドを使用することで「カミングアウト」などができるのですが，
-- 現在のフェーズ
-- 残り時間
-- カミングアウト・白/黒出しの整理
-- 誰が今喋っているのか（緑枠の人）
-- 誰が処刑・噛まれたのか（処刑は十字架，噛みは遺影）
-などゲームの進行状況を分かりやすくまとめて表示してくれます．
-![](../../wiki/img/desc/browser.jpg)
-
-この図は，以下のコール宣言の直後の状態に対応しています．
-![](../../wiki/img/desc/call_co2.jpg)
-
-コール・カミングアウト した順番・時間なども整理して表示されるため，「今誰が言った？」「CO遅くなかった？」「ほぼ同時だった」「把握遅くない？」論争などのあまり本質ではない議論(諸説あり)が一掃できます．（この機能をあえて使わないで進行することももちろん出来ますし，「2秒遅かったが狂人が真占いの結果見てから宣言したのでは」議論などはできます）
-
-
-[ゲームの進行](../../wiki/ゲームの進行) にて，ゲーム中の様子を含め，詳しく説明されています．
-
-## 投げ銭先
-Bitcoin : 3QZPMnkzsubp1SxYT7Z9rMpXRc6Z1jBj5x  
-PayPal : https://paypal.me/TumoiYorozu   
-複数のプロジェクトで同じ投げ銭先なので，コメントで「人狼 Bot を使ったよ」と書いてくれると嬉しいです．
-
-また，この Bot を広めるいう『無償の支援』も歓迎しております．
-
-
-
+### 実行
+node build/index.js -s server_settings/default.json5

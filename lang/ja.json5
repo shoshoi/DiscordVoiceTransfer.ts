@@ -3,15 +3,6 @@ sys : {
         cmd_connect_voice    : ["connect"],
         cmd_disconnect_voice  : ["disconnect"],
 
-        sym_err       : ":x:",
-        sym_warn      : ":warning:",
-        sym_info      : ":information_source:",
-
-        system_color      : 0xAe00ff,
-        system_err_color  : 0xFF2A18,
-        system_warn_color : 0xFDFF54,
-        system_info_color : 0x02D7FF,
-
         Connect_Voice      : "聞き耳BOTを接続しました！",
         Connect_Voice_Err  : "聞き耳BOTの接続に失敗しました",
         Unconnect_Voice_Err : "ボイスチャットに接続してからコマンドを実行してください",

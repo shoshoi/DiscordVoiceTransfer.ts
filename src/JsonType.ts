@@ -15,15 +15,6 @@ export const LangTypeFormat = obj({
         cmd_connect_voice   : arr(str),
         cmd_disconnect_voice : arr(str),
 
-        sym_err       : str,
-        sym_warn      : str, 
-        sym_info      : str, 
-
-        system_color      : num,
-        system_err_color  : num,
-        system_warn_color : num,
-        system_info_color : num,
-
         Connect_Voice : str,
         Connect_Voice_Err : str,
         Unconnect_Voice_Err : str,
@@ -38,17 +29,13 @@ export const ServerSettingsFormat = obj({
     token1          : str,
     token2          : str,
     auto_voice_link : bool,
-    enable_http_server : str,
-    system_GM       : arr(str),
+    environment_heroku : str,
     
     http
     :obj({
         addr         : str,
         ip           : str,
         http_port    : str,
-        template_dir : str,
-        game_html    : str,
-        white_list   : arr(str),
     }),
 });
 export type ServerSettingsType = TsType<typeof ServerSettingsFormat>;

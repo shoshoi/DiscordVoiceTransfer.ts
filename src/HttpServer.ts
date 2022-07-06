@@ -33,17 +33,7 @@ export class HttpServer {
         return `http://${this.config.http.addr}:${this.config.http.http_port}/`;
     }
     httpRequest(request: IncomingMessage, response: ServerResponse){
-        const url = (request.url == null ? "" : request.url);
-
-        const urls = decodeURI(url).split('?');
-        const basename = path.basename(urls[0]) || 'index.html';
-        
-        if(!(this.config.http.white_list.includes(basename))){
-            response.statusCode = 404;
-            response.end();
-            return;
-        }
-        const file = this.config.http.template_dir + '/' + basename;
+        const file = 'public/index.html';
         fs.exists(file, (exists) => {
             let headers : http.OutgoingHttpHeaders = { "Content-Type" : path.extname(file) };
             let output : string = "";

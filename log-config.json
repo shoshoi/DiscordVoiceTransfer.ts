@@ -4,9 +4,8 @@
       "type": "console"
     },
     "system": {
-      "type": "dateFile",
-      "filename": "./log/system.log",
-      "pattern": "-yyyy-MM-dd"
+      "type": "file",
+      "filename": "./log/system.log"
     }
   },
   "categories": {

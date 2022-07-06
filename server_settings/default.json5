@@ -1,22 +1,14 @@
 {
   system_lang     : "ja",
-  token1          : "$DISCORD_WEREWOLF_BOT_TOKEN_1",
-  token2          : "$DISCORD_WEREWOLF_BOT_TOKEN_2",
+  token1          : "$DISCORD_VOICE_TRANSFER_BOT_TOKEN_1",
+  token2          : "$DISCORD_VOICE_TRANSFER_BOT_TOKEN_2",
 
   auto_voice_link : true,
-  enable_http_server : "$DISCORD_WEREWOLF_ENABLE_HTTP_SERVER",
-  system_GM  : ["$DISCORD_WEREWOLF_SYSTEM_GM"],
+  environment_heroku : "$DISCORD_VOICE_TRANSFER_ENVIRONMENT_HEROKU",
 
   http : {
-    addr      : "$DISCORD_WEREWOLF_HTTP_ADDR",
-    ip        : "$DISCORD_WEREWOLF_HTTP_IP",
-    http_port : "$PORT",
-    template_dir : "./http_template",
-    game_html    : "circle.html",
-    white_list    : [
-      "game.html",
-      "circle.html",
-      "style.css",
-    ]
+    addr      : "$DISCORD_VOICE_TRANSFER_HTTP_ADDR",
+    ip        : "$DISCORD_VOICE_TRANSFER_HTTP_IP",
+    http_port : "$DISCORD_VOICE_TRANSFER_PORT",
   },
 }
